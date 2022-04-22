@@ -1,12 +1,14 @@
 from sys import prefix
-import matplotlib.pyplot as plt
-from deeptime.markov import TransitionCountEstimator
-import deeptime.markov as markov
-import seaborn as sns
-import numpy as np
 
-from dylightful.utilities import make_name, get_dir
-from dylightful.discretizer import tae_discretizer, smooth_projection_k_means
+import deeptime.markov as markov
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+from deeptime.markov import TransitionCountEstimator
+
+from dylightful.discretizer import smooth_projection_k_means, tae_discretizer
+from dylightful.postprocess import sort_markov_matrix
+from dylightful.utilities import get_dir, make_name
 
 
 def build_tae_msm(traj_path, time_ser, num_states, prefix=None):
@@ -42,14 +44,9 @@ def fit_msm(trajectory, prefix=None, save_path=None):
 
     plt.cla()
     plt.clf()
+    estimator, count_matrix, counts = model_msm(trajectory)
 
-    estimator = TransitionCountEstimator(lagtime=1, count_mode="sliding")
-    counts = estimator.fit(trajectory).fetch_model()
-    count_matrix = counts.count_matrix  # fit and fetch the model
-    estimator = markov.msm.MaximumLikelihoodMSM(
-        reversible=True, stationary_distribution_constraint=None
-    )
-    ax = sns.heatmap(count_matrix)
+    ax = sns.heatmap(sort_markov_matrix(count_matrix))
     fig = ax.get_figure()
     name = "_msm_count_matrix.png"
     file_name = make_name(prefix=prefix, name=name, dir=save_path)
@@ -60,7 +57,7 @@ def fit_msm(trajectory, prefix=None, save_path=None):
     file_name = make_name(prefix=prefix, name=name, dir=save_path)
     msm = estimator.fit(counts).fetch_model()
     transition_matrix = msm.transition_matrix
-    ax = sns.heatmap(transition_matrix)
+    ax = sns.heatmap(sort_markov_matrix(transition_matrix))
     fig = ax.get_figure()
     plt.xlabel("State")
     plt.ylabel("State")
@@ -68,6 +65,26 @@ def fit_msm(trajectory, prefix=None, save_path=None):
     plt.cla()
     plt.clf()
     return msm, count_matrix
+
+
+def model_msm(trajectory):
+    """Fits the estimator for the Markovian analysis
+
+    Args:
+        trajectory (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    estimator = TransitionCountEstimator(lagtime=1, count_mode="sliding")
+    counts = estimator.fit(trajectory).fetch_model()
+    count_matrix = counts.count_matrix  # fit and fetch the model
+    estimator = markov.msm.MaximumLikelihoodMSM(
+        reversible=True, stationary_distribution_constraint=None
+    )
+
+    return estimator, count_matrix, counts
 
 
 def plot_clustered_traj(trajectory, prefix=None, save_path=None):

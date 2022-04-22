@@ -10,10 +10,11 @@ __pycache__/
 *json
 *cgo 
 *.out
-*dcd
-*png
+*.dcd
+*.png
 notebooks/*
 replot.py
+run_all.sh 
 # C extensions
 *.so
 

@@ -1,13 +1,11 @@
-import numpy as np
-from numpy.lib.arraysetops import unique
 import json
+
+import numpy as np
 import pandas as pd
+from numpy.lib.arraysetops import unique
 
 from dylightful.parser import load_env_partners
-from dylightful.utilities import parse_file_path, make_name
-
-# TODO: Finish refactoring
-# TODO: Include atom numbers of superfeatures
+from dylightful.utilities import make_name, parse_file_path
 
 
 def sort_markov_matrix(markov_matrix):
@@ -20,20 +18,13 @@ def sort_markov_matrix(markov_matrix):
     Returns:
         (np.array): sorted Markov matrix
     """
-
-    b = markov_matrix.copy()
-    for i in range(len(markov_matrix)):
-        ref1 = markov_matrix[i, i]
-        for j in range(i + 1, len(markov_matrix)):
-            ref2 = markov_matrix[j, j]
-            if ref2 > ref1:
-                markov_matrix[i, :] = b[j, :]
-                markov_matrix[j, :] = b[i, :]
-                b = markov_matrix.copy()
-                for k in range(len(markov_matrix)):
-                    markov_matrix[k, i] = b[k, j]
-                    markov_matrix[k, j] = b[k, i]
-                    b = markov_matrix.copy()
+    diag = np.diag(markov_matrix)
+    sorting = np.argsort(diag)
+    for i in range(len(diag)):
+        for j in range(len(diag) - 1):
+            if diag[j + 1] > diag[j]:
+                markov_matrix[[j, j + 1]] = markov_matrix[[j + 1, j]]
+                markov_matrix[:, [j, j + 1]] = markov_matrix[:, [j + 1, j]]
     return markov_matrix
 
 
@@ -218,3 +209,15 @@ def load_validation():
     f = open("../tests/Trajectories/ZIKV/markophore_validation.json")
     data = json.load(f)
     return data
+
+
+if __name__ == "__main__":
+    a = np.array(
+        [
+            [0.8, 0.1, 0.05, 0.05],
+            [0.005, 0.9, 0.03, 0.015],
+            [0.1, 0.2, 0.4, 0.3],
+            [0.01, 0.02, 0.03, 0.94],
+        ]
+    )
+    b = sort_markov_matrix(a)

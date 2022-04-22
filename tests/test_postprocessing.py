@@ -1,14 +1,13 @@
 # test postprocessing of MSM for validation purposes and additional viz.
 
-import pytest
-import numpy as np
 import os
 
-
-from dylightful.discretizer import tae_discretizer, smooth_projection_k_means
-from dylightful.utilities import get_dir, load_parsed_dyno
+import numpy as np
+import pytest
+from dylightful.discretizer import smooth_projection_k_means, tae_discretizer
 from dylightful.msm import fit_msm
 from dylightful.postprocess import postprocessing_msm, sort_markov_matrix
+from dylightful.utilities import get_dir, load_parsed_dyno
 
 dirname = os.path.dirname(__file__)
 
@@ -62,3 +61,24 @@ def test_sort():
     assert np.array_equal(sorted_a[3, :], np.array([0.3, 0.2, 0.1, 0.4])) == True, str(
         sorted_a[3, :]
     )
+    a = np.array(
+        [
+            [0.03, 0.70, 0.81, 0.60],
+            [0.65, 0.35, 0.99, 0.82],
+            [0.33, 0.76, 0.55, 0.09],
+            [0.90, 0.41, 0.67, 0.51],
+        ]
+    )
+    sorted_a = sort_markov_matrix(a)
+    assert (
+        np.array_equal(sorted_a[0, :], np.array([0.55, 0.09, 0.76, 0.33])) == True
+    ), str(sorted_a[0, :])
+    assert (
+        np.array_equal(sorted_a[1, :], np.array([0.67, 0.51, 0.41, 0.90])) == True
+    ), str(sorted_a[1, :])
+    assert (
+        np.array_equal(sorted_a[2, :], np.array([0.99, 0.82, 0.35, 0.65])) == True
+    ), str(sorted_a[2, :])
+    assert (
+        np.array_equal(sorted_a[3, :], np.array([0.81, 0.60, 0.70, 0.03])) == True
+    ), str(sorted_a[3, :])

@@ -1,3 +1,4 @@
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -16,8 +17,9 @@ def make_barplot(time_ser, ylabel, yticks, prefix=None, save_path=None):
     # save_path = get_dir(save_path)
     plt.clf()
     plt.cla()
-    plt.rcParams["font.size"] = "15"
     plt.tight_layout()
+    mpl.rcParams["font.size"] = "20"
+    plt.rc("axes", labelsize=20)
     name = "_barplot.png"
     file_name = make_name(prefix=prefix, name=name, dir=save_path)
     code = time_ser
@@ -30,5 +32,4 @@ def make_barplot(time_ser, ylabel, yticks, prefix=None, save_path=None):
     ax.set_ylabel(ylabel)
     ax.set_yticks(np.arange(len(yticks)))
     ax.set_yticklabels(yticks)
-
     fig.savefig(file_name, dpi=dpi, bbox_inches="tight")
